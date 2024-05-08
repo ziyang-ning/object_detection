@@ -1,0 +1,9 @@
+
+-----------------
+ESP32S3
+
+The Primary code files are 452_threshold_opt.ino and i2c_master.h, the rest is starter code provided by the espressif/arduino-esp32 library. 
+
+452_threshold_opt.ino: grab image data from the OV5640 camera, perform object detection, and transmit the 8 bits x_median_final and y_median_final via I2C.
+
+i2c_master.h: an custom implementation of I2C communication. Sends 2 packets of 8 bit integer.

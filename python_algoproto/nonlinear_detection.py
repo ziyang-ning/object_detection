@@ -7,7 +7,6 @@
 import csv
 import numpy as np
 import matplotlib.pyplot as plt
-import heapq
 from matplotlib.patches import Circle
 from PIL import Image
 
@@ -590,6 +589,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
     numpixvisited = 0
 
     detected = 0 #make this a bool in C++
+    blob_start_index = -1  #the left most starting index of the first blob detected
 
     num_conseq_black_rows = 0
     last_row_black = 0      #Let this be a bool in C++ implementation
@@ -600,10 +600,9 @@ def fam2_p2(gray_buff, image_shape, threshold):
         all_x_gt_thresh = []    #max size will be the x length of the image
         all_x_gt_thresh_real_length = 0
 
-        blob_start_index = -1  #the left most starting index of the first blob detected
-
-        if(blob_start_index != -1):
-            i = blob_start_index
+        if(blob_start_index != -1 and blob_start_index - 20 > 0):
+            i = blob_start_index - 20
+            pixcount = pixcount + i
         else:
             i = 0
 
@@ -659,7 +658,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
                 if(i - 20 < 0):
                     blob_start_index = 0
                 else:
-                    blob_start_index = i - 20
+                    blob_start_index = i
 
                 x = i
                 all_x_gt_thresh.append(x)
@@ -715,7 +714,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
             num_conseq_black_rows = num_conseq_black_rows + 1
             last_row_black = 1
 
-        if(all_x_gt_thresh_real_length == 0 and blob_start_index == -1 and detected):
+        if(all_x_gt_thresh_real_length == 0 and blob_start_index != -1 and detected):
             break
 
         if(num_conseq_black_rows > 2 and last_row_black and j+3 < image_shape[0]):
