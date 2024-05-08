@@ -108,8 +108,8 @@ if(jpg):
     gray_buff = image_to_1d_array(filename)
     image = convert_jpg_to_matrix(filename)
 else:
-    filename = 'data/graydata/all_black.csv'  # Replace with your CSV file's path
-    # filename = 'data/graydata/gray2_240X240.csv'  # Replace with your CSV file's path
+    # filename = 'data/graydata/all_black.csv'  # Replace with your CSV file's path
+    filename = 'data/graydata/gray1_240X240.csv'  # Replace with your CSV file's path
     # filename = 'data/graydata/FOV_verification3.csv'  # Replace with your CSV file's path
     image = read_csv_to_grayscale_image(filename, image_shape)
     gray_buff = make_gray_buffer(filename, image_shape)
@@ -452,21 +452,20 @@ def fam1_p2(gray_buff, image_shape, threshold):
     numpixvisited = 0
 
     detected = 0 #make this a bool in C++
+    blob_start_index = -1  #the left most starting index of the first blob detected
 
     for j in range(image_shape[0]):
         all_x_gt_thresh = []    #max size will be the x length of the image
         all_x_gt_thresh_real_length = 0
 
-        blob_start_index = -1  #the left most starting index of the first blob detected
-        
+        # print("blob_start_index: ", blob_start_index)
 
-        if(blob_start_index != -1):
-            i = blob_start_index
+        if(blob_start_index != -1 and blob_start_index - 20 > 0):
+            i = blob_start_index - 20
+            pixcount = pixcount + i
         else:
             i = 0
         
-        # print("blob start index: ", blob_start_index)
-
         while (i < image_shape[1]):
             #if no 3 whites in a row, then skip 10 ahead
             if(gray_buff[pixcount] <= threshold or gray_buff[pixcount+1] <= threshold or gray_buff[pixcount+2] <= threshold):
@@ -519,7 +518,7 @@ def fam1_p2(gray_buff, image_shape, threshold):
                 if(i - 20 < 0):
                     blob_start_index = 0
                 else:
-                    blob_start_index = i - 20
+                    blob_start_index = i
 
                 x = i
                 all_x_gt_thresh.append(x)
@@ -565,7 +564,7 @@ def fam1_p2(gray_buff, image_shape, threshold):
         if(all_x_gt_thresh_real_length != 0):
             x_medians.append(all_x_gt_thresh[all_x_gt_thresh_real_length // 2 ]) # floor division
             y_vals_of_x_medians.append(j)
-        elif(all_x_gt_thresh_real_length == 0 and blob_start_index == -1 and detected):
+        elif(all_x_gt_thresh_real_length == 0 and blob_start_index != -1 and detected):
             break
 
     ###----Added condition for all black or almost all black)
