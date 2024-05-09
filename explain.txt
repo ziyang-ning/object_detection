@@ -2,7 +2,7 @@ Family 1 (Single target tracking, Median will only be median of all whites detec
 
 Proposed algorithm 1: 
 # idea: (row by row)check pixel, if no 3 consecutive whites jump 10 pixels ahead
-# if 3 consecutive whites, then do not jump, 
+# if 3 consecutive whites, then do not jump, (---> changed to jump 5)
 # search to the right until reach a black pixel (cannot go to the left since that will cause array to be unsorted), will still attempt to finish the whole row (does not assume there's only one object)
 # if no white found do the same the next row
 

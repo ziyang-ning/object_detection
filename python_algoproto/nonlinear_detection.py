@@ -101,9 +101,9 @@ image_shape = (240, 240)  # Image dimensions (height, width)
 
 jpg = 1 #a bool for input data type, when 0 it means input is a csv file
 if(jpg):
-    # filename = 'multi_roundedsquare.jpg'
-    filename = 'multiobj_challenge.jpg'
-    # filename = 'two_obj_noise.jpg'
+    # filename = 'data/graydata/multi_roundedsquare.jpg'
+    filename = 'data/graydata/multiobj_challenge.jpg'
+    # filename = 'data/graydata/two_obj_noise.jpg'
     gray_buff = image_to_1d_array(filename)
     image = convert_jpg_to_matrix(filename)
 else:
@@ -126,7 +126,7 @@ def plot_image_with_median_circle(buff_vec, image_shape, median_x, median_y):
     # Plot the grayscale image
     ax.imshow(image_data, cmap='gray')
     # Add a red circle at the median coordinates
-    circle = Circle((median_x, median_y), 5, color='red', fill=False)
+    circle = Circle((median_x, median_y), 2, color='red', fill=False)
     ax.add_patch(circle)
     plt.axis('off')  # Hide axes
     plt.show()
@@ -536,8 +536,8 @@ def fam1_p2(gray_buff, image_shape, threshold):
                     x = i
                     all_x_gt_thresh.append(x)
                     all_x_gt_thresh_real_length = all_x_gt_thresh_real_length + 1
-                    i = i + 1
-                    pixcount = pixcount + 1
+                    i = i + 5
+                    pixcount = pixcount + 5
                     numpixvisited = numpixvisited + 1
 
                     #for visualization
@@ -682,8 +682,8 @@ def fam2_p2(gray_buff, image_shape, threshold):
                     x = i
                     all_x_gt_thresh.append(x)
                     all_x_gt_thresh_real_length = all_x_gt_thresh_real_length + 1
-                    i = i + 1
-                    pixcount = pixcount + 1
+                    i = i + 5
+                    pixcount = pixcount + 5
                     numpixvisited = numpixvisited + 1
 
                     #for visualization
@@ -721,7 +721,8 @@ def fam2_p2(gray_buff, image_shape, threshold):
             j = j + 2
             pixcount = pixcount + 2 * image_shape[1]
         
-        j = j + 1
+        j = j + 2
+        pixcount = pixcount + image_shape[1]
 
     ###----Added condition for all black or almost all black)
     ### already implemented in arduino code
