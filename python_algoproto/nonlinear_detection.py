@@ -701,7 +701,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
                 ##CONTENT ADDED HERE
                 #moving to the next row!
                 pixcount = pixcount + image_shape[1] - i
-                i = i + len(image[1]) #automatically moves to the next row
+                i = i + image_shape[1] #automatically moves to the next row
 
         # The median function
         # I don't think 1 pixel difference matters, so not going to do even odd, improves speed
