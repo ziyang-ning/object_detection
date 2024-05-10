@@ -1,3 +1,5 @@
+## cleaner but unupdated/incorrect pyton code 
+
 def fam2_p2(gray_buff, image_shape, threshold):
     pixcount = 0    #using this iterator, might be more efficent than doing mult everytime
     x_medians = []   # size will the the y length of the image

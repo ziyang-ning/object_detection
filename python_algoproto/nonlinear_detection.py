@@ -710,6 +710,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
             y_vals_of_x_medians.append(j)
 
             last_row_black = 0
+            num_conseq_black_rows = 0
         else:
             num_conseq_black_rows = num_conseq_black_rows + 1
             last_row_black = 1

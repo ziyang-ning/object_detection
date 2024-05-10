@@ -60,14 +60,6 @@ void setup() {
   #if defined(LED_GPIO_NUM)
     setupLedFlash(LED_GPIO_NUM);
   #endif
-  
-//  sensor_t * s = esp_camera_sensor_get();
-//  s->set_brightness(s, 1); // up the brightness just a bit
-//  s->set_saturation(s, 0.6); // lower the saturation
-//  s->set_whitebal(s, 1);       // 0 = disable , 1 = enable
-//  s->set_awb_gain(s, 1);       // 0 = disable , 1 = enable
-//  s->set_wb_mode(s, 3);        // 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home)
-//  s->set_contrast(s, 0);       // -2 to 2
 }
 
 
@@ -98,27 +90,94 @@ void loop() {
   uint16_t x_medians[IMG_HIGHT];
   uint16_t y_vals_of_x_medians[IMG_HIGHT];
 
-  
+  // fam2p2 additional vars
+  uint32_t numpixvisited = 0;
+  bool detected = 0;
+  uint16_t blob_start_index = -1;
+  uint16_t num_conseq_black_rows = 0;
+  bool last_row_black = 0;
 
-  for(uint16_t j = 0; j < IMG_HIGHT; j++){
+
+  // for(uint16_t j = 0; j < IMG_HIGHT; j++){
+  uint16_t j = 0;
+  while(j < IMG_HIGHT){
     uint16_t all_x_gt_thresh [IMG_WIDTH];
     uint16_t all_x_gt_thresh_real_length = 0;
 
-    // uint64_t innerloop = esp_timer_get_time();
-    for(uint16_t i = 0; i < IMG_WIDTH; i++){
+    uint16_t i = 0;
+    if(blob_start_index != -1 && blob_start_index - 20 > 0){
+      i = blob_start_index - 20;
+      pixcount = pixcount + i;
+    }
 
+    // uint64_t innerloop = esp_timer_get_time();
+    // for(uint16_t i = 0; i < IMG_WIDTH; i++){
+  while(i < IMG_WIDTH && pixcount < (IMG_WIDTH * IMG_HIGHT)){
     //--------For Printing---------------//
     if(x == 'p'){
       Serial.printf("%d\n",fb->buf[pixcount]);
     }
     //--------For Printing---------------//
-      
-      if(fb->buf[pixcount] > THRESH){
-        all_x_gt_thresh[all_x_gt_thresh_real_length] = i;
-        all_x_gt_thresh_real_length += 1;
+    
+    // IF there is no 3 whites in a row
+    if(fb->buff[pixcount] <= THRESH || fb->buff[pixcount+1] <= THRESH || 
+    fb->buff[pixcount+2] <= THRESH){
+      if(i + 10 < IMG_WIDTH){
+        i += 10;
+        pixcount += 10;
+        numpixvisited += 1; //This is not exact, but a good approx
+        // This is because the first one is most likely black
+      }else{
+        pixcount = pixcount + IMG_WIDTH - i;
+        i = IMG_WIDTH;
+        numpixvisited += 1;
       }
-      pixcount += 1;
+    }else{  // if there is 3 whites in a row
+      detected = 1;
+      if(i - 20 < 0){
+        blob_start_index = 0;
+      }else{
+        blob_start_index = i;
+      }
+        all_x_gt_thresh[all_x_gt_thresh_real_length] = i;
+        all_x_gt_thresh[all_x_gt_thresh_real_length+1] = i+1;
+        all_x_gt_thresh[all_x_gt_thresh_real_length+2] = i+2;
+        all_x_gt_thresh_real_length += 3;
+        i += 3;
+        pixcount += 3;
+        numpixvisited += 3;
+
+        //Start searching to the right
+        while(fb->buff[pixcount] > THRESH && i < IMG_WIDTH){
+          all_x_gt_thresh[all_x_gt_thresh_real_length] = i;
+          all_x_gt_thresh_real_length += 1;
+
+          if(i + 5 < IMG_WIDTH){
+            i += 5;
+            pixcount += 5;
+            numpixvisited += 1; //This is not exact, but a good approx
+          // This is because the first one is most likely black
+          }else{
+            pixcount = pixcount + IMG_WIDTH - i;
+            i = IMG_WIDTH;
+            numpixvisited += 1;
+          }
+        }
+
+        //current pixcount is already checked and it's not white
+        // this was != before, trying to make it more robust? 
+        if(i != IMG_WIDTH < IMG_WIDTH){
+          i += 1;
+          pixcount += 1;
+          numpixvisited += 1;
+        }
+
+        //since already reaching black, object ends, go to the next row
+        pixcount = pixcount + IMG_WIDTH - i;
+        i = i + IMG_WIDTH   //Go striaght to the next row
     }
+
+  }
     // uint64_t innerlooptime = esp_timer_get_time() - innerloop;
     // Serial.println(innerlooptime);
     
@@ -128,7 +187,25 @@ void loop() {
       x_medians[x_medians_real_length] = all_x_gt_thresh[all_x_gt_thresh_real_length/2];
       y_vals_of_x_medians[x_medians_real_length] = j;
       x_medians_real_length += 1;
+
+      last_row_black = 0;
+      num_conseq_black_rows = 0;
+    }else{
+      num_conseq_black_rows += 1;
+      last_row_black = 1;
     }
+      //since in the else, all_x_gt_thresh_real_length == 0, i removed it (in the if)
+      if(blob_start_index != -1 && detected){
+        break;
+      }
+
+      if(num_conseq_black_rows > 2 && last_row_black && j+3 < IMG_WIDTH){
+        j = j + 2;
+        pixcount = pixcount + 2 * IMG_WIDTH;
+      }
+
+      j = j + 2;
+      pixcount = pixcount + IMG_WIDTH;
   }
   // This should be already a floor division? because they are integers?
   //-------CONDITION WHERE BASICALLY EVERYTHING IS DARK ----------------
