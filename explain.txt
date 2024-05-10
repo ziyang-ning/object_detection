@@ -11,14 +11,15 @@ ANALYSIS: Since we are iterating through all rows, this means that we will alway
 Proposed algorithm 2:
 #Same as last algorithm, however, if there are 3 consecutive all black rows
 #also start skipping rows, skip 3 rows, and search for whites in the 4th row
+#only skip 1 row when an object is seen
 
 Family 2 (Multi-object, Single target tracking, ultra fast but not robust to noise)
 target the left most object
 Proposed algorithm 1: 
 # idea: (row by row)check pixel, if no 3 consecutive whites jump 10 pixels ahead
 # if 3 consecutive whites, then do not jump, 
-# search to the right until reach a black pixel (cannot go to the left since that will cause array to be unsorted), will won't attempt to finish the whole row (assuming that's the only object of interest) 
-# start the search 30 pixels before the last row's first recorded white pixel (gives a lead of 20 pixel size increase each row)
+# search to the right until reach a black pixel (cannot go to the left since that will cause array to be unsorted), won't attempt to finish the whole row (assuming that's the only object of interest) 
+# start the search 20 pixels before the last row's first recorded white pixel (gives a lead of 20 pixel size increase each row)
 # if the whole row is black, this means that the object no longer exists. Stop search and return median immediately)
 
 Proposed algorithm 2: 

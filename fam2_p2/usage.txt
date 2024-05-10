@@ -1,6 +1,0 @@
------------------
-ESP32S3
-
-452_threshold_opt.ino: After compiling and uploading, open the serial monitor to check camera status and basic timing statistics. To print out the image data along with the predicted median values, input 'p' in the serial monitor. Note, it is recommended to use Arduino Version 1.8 for features like select all text data in the serial monitor, clear outputs, and toggle autoscrolling options.
-
-i2c_master.h: place #include "i2c_master.h" on the top of the file, place i2c_setup(); inside the setup function. Use send_data(8_bit_here, 8_bit_here); to send 2 data packets, each maximum of 8 bits.

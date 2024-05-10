@@ -1,0 +1,11 @@
+Fam2p2 (Multi-object, Single target tracking, ultra fast)
+target the top most object (the object that's first seen)
+Proposed algorithm 1: 
+# idea: (row by row)check pixel, if no 3 consecutive whites jump 10 pixels ahead
+Skip 1 row by default, if 3 consecutive all black rows, start jumping 4 rows at a time 
+
+# if 3 consecutive whites, then jump 5 and see if the next one is also white, 
+# search to the right until reach a black pixel (cannot go to the left since that will cause array to be unsorted), won't attempt to finish the whole row (assuming that's the only object of interest) 
+# (jumps 1 row by default again) start the search 20 pixels before the last "first recorded white pixel" (gives a lead of 20 pixel size increase each row)
+
+# if the whole row is black after the object has already been detected, this means that the object no longer exists. Stop search and return median immediately)

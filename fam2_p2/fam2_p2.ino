@@ -2,8 +2,6 @@
 #define CAMERA_MODEL_XIAO_ESP32S3 // Has PSRAM
 #include "camera_pins.h"
 
-#include "i2c_master.h"
-
 const uint8_t IMG_WIDTH = 240;   //have to change this var manually
 const uint8_t IMG_HIGHT = 240;   //have to change this var manually
 const uint8_t THRESH = 240;       //have to change this var manually
@@ -80,8 +78,8 @@ void loop() {
     Serial.println("Camera capture failed");
     return;
   }
-//  uint64_t frameloadT = esp_timer_get_time() - fr_start;
-//  printf("%s, %d\n", "frame loader time:", frameloadT);
+  uint64_t frameloadT = esp_timer_get_time() - fr_start;
+  printf("%s, %d\n", "frame loader time:", frameloadT);
    
   char x; 
   // set = p for printing image buff value printing
@@ -89,7 +87,7 @@ void loop() {
     x = Serial.read();
   }
 
-//  uint64_t median_start = esp_timer_get_time();
+  uint64_t median_start = esp_timer_get_time();
 
   //Default median = 0 
   uint8_t x_median_final = 0;
@@ -99,6 +97,8 @@ void loop() {
   uint16_t x_medians_real_length = 0;
   uint16_t x_medians[IMG_HIGHT];
   uint16_t y_vals_of_x_medians[IMG_HIGHT];
+
+  
 
   for(uint16_t j = 0; j < IMG_HIGHT; j++){
     uint16_t all_x_gt_thresh [IMG_WIDTH];
@@ -137,26 +137,15 @@ void loop() {
     y_median_final = y_vals_of_x_medians[x_medians_real_length/2];
     }
 
-  uint64_t send_time_start = esp_timer_get_time();  
-  send_data(x_median_final,y_median_final);
-//  send_data(100,100);
-  uint64_t send_time = esp_timer_get_time() - send_time_start;
-  printf("%s, %d\n", "sending data time:", send_time);
+  uint64_t medianT = esp_timer_get_time() - median_start;
+  printf("%s, %d\n", "Median algo time:", medianT);
 
-  
+  Serial.printf("%d, %d\n",x_median_final, y_median_final);
 
-//  uint64_t medianT = esp_timer_get_time() - median_start;
-//  printf("%s, %d\n", "Median algo time:", medianT);
-
-  //--------For Printing---------------//
-//  if(x == 'p'){
-    Serial.printf("%d, %d\n",x_median_final, y_median_final);
-//  }
-  //--------For Printing---------------//
 
   esp_camera_fb_return(fb);
 
   uint64_t print_frame_time = esp_timer_get_time() - fr_start;
-//  Serial.println("___________ONE PICTURE__________");
-//  Serial.println(print_frame_time);
+  Serial.println("___________ONE PICTURE__________");
+  Serial.println(print_frame_time);
 }
