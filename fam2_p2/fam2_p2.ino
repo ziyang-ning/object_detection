@@ -4,7 +4,7 @@
 
 const uint8_t IMG_WIDTH = 240;   //have to change this var manually
 const uint8_t IMG_HIGHT = 240;   //have to change this var manually
-const uint8_t THRESH = 240;       //have to change this var manually
+const uint8_t THRESH = 210;       //have to change this var manually
 const uint8_t min_bright_rows = 5; //The min bright row to return median
 
 camera_fb_t *fb;
@@ -13,8 +13,6 @@ void setup() {
   Serial.begin(115200);
   Serial.setDebugOutput(true);
   Serial.println();
-
-  i2c_setup();
   
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
@@ -74,7 +72,7 @@ void loop() {
   printf("%s, %d\n", "frame loader time:", frameloadT);
    
   char x; 
-  // set = p for printing image buff value printing
+  // set = p for printing image buf value printing
   if(Serial.available() > 0) {  
     x = Serial.read();
   }
@@ -101,27 +99,36 @@ void loop() {
   // for(uint16_t j = 0; j < IMG_HIGHT; j++){
   uint16_t j = 0;
   while(j < IMG_HIGHT){
+
+    
     uint16_t all_x_gt_thresh [IMG_WIDTH];
     uint16_t all_x_gt_thresh_real_length = 0;
 
     uint16_t i = 0;
-    if(blob_start_index != -1 && blob_start_index - 20 > 0){
+    // for uint16 -1 is 65535
+    if(blob_start_index != 65535 && blob_start_index - 20 > 0){
       i = blob_start_index - 20;
       pixcount = pixcount + i;
     }
 
     // uint64_t innerloop = esp_timer_get_time();
     // for(uint16_t i = 0; i < IMG_WIDTH; i++){
+    
   while(i < IMG_WIDTH && pixcount < (IMG_WIDTH * IMG_HIGHT)){
+    
+    
     //--------For Printing---------------//
-    if(x == 'p'){
-      Serial.printf("%d\n",fb->buf[pixcount]);
-    }
+//    if(x == 'p'){
+//      Serial.printf("%d\n",fb->buf[pixcount]);
+//      Serial.printf("%d, %d\n", i, j);
+//    }
     //--------For Printing---------------//
     
     // IF there is no 3 whites in a row
-    if(fb->buff[pixcount] <= THRESH || fb->buff[pixcount+1] <= THRESH || 
-    fb->buff[pixcount+2] <= THRESH){
+    if(fb->buf[pixcount] <= THRESH || fb->buf[pixcount+1] <= THRESH || 
+    fb->buf[pixcount+2] <= THRESH){
+      
+            
       if(i + 10 < IMG_WIDTH){
         i += 10;
         pixcount += 10;
@@ -148,7 +155,7 @@ void loop() {
         numpixvisited += 3;
 
         //Start searching to the right
-        while(fb->buff[pixcount] > THRESH && i < IMG_WIDTH){
+        while(fb->buf[pixcount] > THRESH && i < IMG_WIDTH){
           all_x_gt_thresh[all_x_gt_thresh_real_length] = i;
           all_x_gt_thresh_real_length += 1;
 
@@ -174,7 +181,7 @@ void loop() {
 
         //since already reaching black, object ends, go to the next row
         pixcount = pixcount + IMG_WIDTH - i;
-        i = i + IMG_WIDTH   //Go striaght to the next row
+        i = i + IMG_WIDTH;   //Go striaght to the next row
     }
 
   }
@@ -194,8 +201,8 @@ void loop() {
       num_conseq_black_rows += 1;
       last_row_black = 1;
     }
-      //since in the else, all_x_gt_thresh_real_length == 0, i removed it (in the if)
-      if(blob_start_index != -1 && detected){
+
+      if(all_x_gt_thresh_real_length == 0 && blob_start_index != -1 && detected){
         break;
       }
 
@@ -206,6 +213,18 @@ void loop() {
 
       j = j + 2;
       pixcount = pixcount + IMG_WIDTH;
+
+      //visualize all content in the all_x_gt_thresh
+      //this is basically all the pixels that are accounted by the algo
+      //----- for printing --------------
+      if(x == 'p'){
+        Serial.println("********i am trying to print here*************");
+        Serial.println(all_x_gt_thresh_real_length);
+        for(int m = 0; m < all_x_gt_thresh_real_length; m++){
+          Serial.printf("%d, %d\n", all_x_gt_thresh[m], j);
+        }
+      }
+      
   }
   // This should be already a floor division? because they are integers?
   //-------CONDITION WHERE BASICALLY EVERYTHING IS DARK ----------------
@@ -215,10 +234,10 @@ void loop() {
     }
 
   uint64_t medianT = esp_timer_get_time() - median_start;
-  printf("%s, %d\n", "Median algo time:", medianT);
+  printf("%s, %d\n", "Median algo time: ", medianT);
 
   Serial.printf("%d, %d\n",x_median_final, y_median_final);
-
+  Serial.printf("%s, %d\n", "numpixvisited: ", numpixvisited);
 
   esp_camera_fb_return(fb);
 

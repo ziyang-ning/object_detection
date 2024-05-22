@@ -99,7 +99,7 @@ def plot_bin(image, thresh):
 # Configuration
 image_shape = (240, 240)  # Image dimensions (height, width)
 
-jpg = 1 #a bool for input data type, when 0 it means input is a csv file
+jpg = 0 #a bool for input data type, when 0 it means input is a csv file
 if(jpg):
     # filename = 'data/graydata/multi_roundedsquare.jpg'
     filename = 'data/graydata/multiobj_challenge.jpg'
@@ -107,8 +107,8 @@ if(jpg):
     gray_buff = image_to_1d_array(filename)
     image = convert_jpg_to_matrix(filename)
 else:
-    # filename = 'data/graydata/all_black.csv'  # Replace with your CSV file's path
-    filename = 'data/graydata/gray1_240X240.csv'  # Replace with your CSV file's path
+    filename = 'data/graydata/all_black.csv'  # Replace with your CSV file's path
+    # filename = 'data/graydata/gray1_240X240.csv'  # Replace with your CSV file's path
     # filename = 'data/graydata/FOV_verification3.csv'  # Replace with your CSV file's path
     image = read_csv_to_grayscale_image(filename, image_shape)
     gray_buff = make_gray_buffer(filename, image_shape)
