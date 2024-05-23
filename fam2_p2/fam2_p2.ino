@@ -58,9 +58,19 @@ void setup() {
   #if defined(LED_GPIO_NUM)
     setupLedFlash(LED_GPIO_NUM);
   #endif
+
+//  rand_gen();
 }
 
+//exactlly 10% of the image size
+uint32_t rand_index [5760];
+void rand_gen(){
+  for(int i = 0; i < 5760; i++){
+    rand_index[i] = random(0, 57600);
+  }
+}
 
+/*
 void loop() {
   uint64_t fr_start = esp_timer_get_time();
   fb = esp_camera_fb_get();
@@ -244,4 +254,53 @@ void loop() {
   uint64_t print_frame_time = esp_timer_get_time() - fr_start;
   Serial.println("___________ONE PICTURE__________");
   Serial.println(print_frame_time);
+}
+*/
+
+//benchmark for accessing all pixels  
+void loop() {  
+  uint64_t fr_start = esp_timer_get_time();
+  fb = esp_camera_fb_get();
+  if (!fb) {
+    Serial.println("Camera capture failed");
+    return;
+  }
+  uint64_t frameloadT = esp_timer_get_time() - fr_start;
+  printf("%s, %d\n", "frame loader time:", frameloadT);
+
+  printf("%s, %d\n", "rand num:", rand_index[1]);
+
+  uint64_t accssT_start = esp_timer_get_time();
+  uint32_t pixcount = 0;
+  uint16_t x_medians[IMG_HIGHT];
+
+
+  // TEST FOR INORDER ACCECSS
+  for(uint16_t j = 0; j < IMG_HIGHT; j++){
+    for(uint16_t i = 0; i < IMG_WIDTH; i++){
+      if(fb->buf[pixcount] > THRESH){
+        x_medians[i] = fb->buf[pixcount];
+//        Serial.println("I am acually doing stuff");
+      }
+      pixcount++;
+    }
+  }
+
+// TEST for out of order access
+//  for(int i = 0; i < 5760; i++){
+//    if(fb->buf[ rand_index[i] ] > THRESH){
+//      x_medians[2] = fb->buf[ rand_index[i] ];
+//    }
+//  }
+  
+  uint64_t accssT = esp_timer_get_time() - accssT_start;
+  printf("%s, %d\n", "img access time:", accssT);
+
+  esp_camera_fb_return(fb);
+
+  uint64_t print_frame_time = esp_timer_get_time() - fr_start;
+  Serial.println("___________ONE PICTURE__________");
+  Serial.println(print_frame_time);
+
+  rand_gen();
 }
