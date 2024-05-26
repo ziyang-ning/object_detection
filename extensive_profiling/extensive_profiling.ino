@@ -4,10 +4,22 @@
 
 const uint8_t IMG_WIDTH = 240;   //have to change this var manually
 const uint8_t IMG_HIGHT = 240;   //have to change this var manually
-const uint8_t THRESH = 210;       //have to change this var manually
+const uint8_t THRESH = 0;       //have to change this var manually
 const uint8_t min_bright_rows = 5; //The min bright row to return median
 
+uint32_t x_medians [5760];
+
 camera_fb_t *fb;
+
+
+//exactlly 10% of the image size
+uint32_t rand_index [5760];
+void rand_gen(){
+  for(int i = 0; i < 5760; i++){
+    rand_index[i] = random(0, 57600);
+  }
+}
+
 
 void setup() {
   Serial.begin(115200);
@@ -59,6 +71,8 @@ void setup() {
     setupLedFlash(LED_GPIO_NUM);
   #endif
 
+  rand_gen();
+
 }
 
 //benchmark for accessing all pixels  
@@ -78,10 +92,40 @@ void loop() {
   uint64_t func_start = esp_timer_get_time();
 
   //Some slow function
-  int x = 0;
+//  int x = 0;
+//  for(int i = 0; i < 5760; i++){
+//    x = random(0, 57600);
+//  }
+
+  // Random access function
+  //A array of random number with length 5760 was generated
+  //Make a random start index, to ensure random access
+  
+//  int rand_start = random(0, 5760);
+//  for(int i = 0; i < 5760; i++){
+//    if(rand_start == 5760){
+//      rand_start = 0;
+//    }
+//    if(fb->buf[ rand_index[rand_start] ] > THRESH){
+//      x_medians[i] = (fb->buf[ rand_index[rand_start] ]);
+//    }
+//    rand_start++;
+//  }
+
+// inorder access function
+  int rand_start = random(0, 5760);
   for(int i = 0; i < 5760; i++){
-    x = random(0, 57600);
+    //Still keeping this if statement for consistency
+    if(rand_start == 5760){
+      rand_start = 0;
+    }
+    
+    if(fb->buf[i] > THRESH){
+      x_medians[i] = (fb->buf[i]);
+    }
+    rand_start++;
   }
+  
   
   uint64_t funcT = esp_timer_get_time() - func_start;
   printf("%s, %d\n", "function run time:", funcT);

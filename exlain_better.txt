@@ -9,3 +9,13 @@ Skip 1 row by default, if 3 consecutive all black rows, start jumping 4 rows at 
 # (jumps 1 row by default again) start the search 20 pixels before the last "first recorded white pixel" (gives a lead of 20 pixel size increase each row)
 
 # if the whole row is black after the object has already been detected, this means that the object no longer exists. Stop search and return median immediately)
+
+Raw, 10 on each side:
+
+O O [X X X X X X X X X X (X) X X X X X X X X X X]
+
+Worst Case 1:
+O O X X X X X X X X [X {X X X X} (X) {X X X X} X {X X}]
+
+Worst Case 2:
+[X X X X X]
