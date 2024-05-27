@@ -1,9 +1,74 @@
-## cleaner but unupdated/incorrect pyton code 
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+from PIL import Image
 
+# defalut x y = 0, 0
+x_median_final = 0
+y_median_final = 0
+
+##--- Helper functions, for plotting only ---
+def plot_buffer(buffvec, image_shape):
+    image_data = np.empty((image_shape[0], image_shape[1]), dtype=np.uint8)
+    for i in range(len(buffvec)):
+            # Convert the string data to uint8
+            pixel_value = int(buffvec[i])
+            # Calculate the x, y coordinates
+            y = i // image_shape[1]
+            x = i % image_shape[1]
+            # print(y,x)
+            # Place the pixel at the correct position
+            image_data[y, x] = pixel_value
+    # Plot the image in grayscale
+    plt.imshow(image_data, cmap='gray')
+    plt.axis('off')  # Hide the axes
+    plt.show()
+
+def convert_jpg_to_matrix(filename):
+    # Open the image file using PIL
+    with Image.open(filename) as img:
+        # Convert the image to RGB (if not already in this mode)
+        gray_img = img.convert()
+        # Convert the image to a NumPy array
+        matrix = np.array(gray_img)
+        return matrix
+
+
+def image_to_1d_array(image_path):
+    # Open the image file
+    with Image.open(image_path) as img:
+        # Convert image to grayscale if it's not already
+        grayscale_img = img.convert('L')
+        
+        # Convert the image data to a numpy array
+        np_array = np.array(grayscale_img)
+        
+        # Flatten the 2D array to 1D
+        flat_np_array = np_array.flatten()
+
+    return flat_np_array
+
+
+def plot_image_with_median_circle(buff_vec, image_shape, median_x, median_y):
+    # Reshape buff_vec to 2D image for plotting
+    image_data = buff_vec.reshape(image_shape)
+    fig, ax = plt.subplots()
+    # Plot the grayscale image
+    ax.imshow(image_data, cmap='gray')
+    # Add a red circle at the median coordinates
+    circle = Circle((median_x, median_y), 2, color='red', fill=False)
+    ax.add_patch(circle)
+    plt.axis('off')  # Hide axes
+    plt.show()
+
+
+# -- main function
 def fam2_p2(gray_buff, image_shape, threshold):
     pixcount = 0    #using this iterator, might be more efficent than doing mult everytime
     x_medians = []   # size will the the y length of the image
     y_vals_of_x_medians = []
+    arr_pixvisited = [0] * image_shape[0]*image_shape[1]     # purely for visualization
     numpixvisited = 0
 
     detected = 0 #make this a bool in C++
@@ -28,11 +93,40 @@ def fam2_p2(gray_buff, image_shape, threshold):
 
             if(gray_buff[pixcount] <= threshold or gray_buff[pixcount+1] <= threshold or gray_buff[pixcount+2] <= threshold):
                 if(i+10 < image_shape[1]):
+
+                    #for visualization, yeah shitty code i know
+                    if(gray_buff[pixcount] <= threshold):
+                        numpixvisited = numpixvisited + 1
+                        arr_pixvisited[pixcount] = 255
+                    elif(gray_buff[pixcount+1] <= threshold):
+                        numpixvisited = numpixvisited + 2
+                        arr_pixvisited[pixcount] = 255
+                        arr_pixvisited[pixcount+1] = 255
+                    elif(gray_buff[pixcount+2] <= threshold):
+                        numpixvisited = numpixvisited + 3
+                        arr_pixvisited[pixcount] = 255
+                        arr_pixvisited[pixcount+1] = 255
+                        arr_pixvisited[pixcount+2] = 255
+
                     i = i + 10
                     pixcount = pixcount + 10
                     
 
                 else:
+                    #for visualization, yeah shitty code i know
+                    if(gray_buff[pixcount] <= threshold):
+                        numpixvisited = numpixvisited + 1
+                        arr_pixvisited[pixcount] = 255
+                    elif(gray_buff[pixcount+1] <= threshold):
+                        numpixvisited = numpixvisited + 2
+                        arr_pixvisited[pixcount] = 255
+                        arr_pixvisited[pixcount+1] = 255
+                    elif(gray_buff[pixcount+2] <= threshold):
+                        numpixvisited = numpixvisited + 3
+                        arr_pixvisited[pixcount] = 255
+                        arr_pixvisited[pixcount+1] = 255
+                        arr_pixvisited[pixcount+2] = 255
+
                     pixcount = pixcount + image_shape[1] - i
                     i = image_shape[1]
                     numpixvisited = numpixvisited + 1
@@ -58,6 +152,9 @@ def fam2_p2(gray_buff, image_shape, threshold):
                 pixcount = pixcount + 3
                 numpixvisited = numpixvisited + 3
 
+                #for visualization
+                arr_pixvisited[pixcount-1] = arr_pixvisited[pixcount-2] =  arr_pixvisited[pixcount-3] = 255
+
                 #searach to the right
                 while(gray_buff[pixcount] > threshold and i < image_shape[1]):
                     x = i
@@ -67,13 +164,17 @@ def fam2_p2(gray_buff, image_shape, threshold):
                     pixcount = pixcount + 5
                     numpixvisited = numpixvisited + 1
 
-
+                    #for visualization
+                    arr_pixvisited[pixcount-1] = 255
 
                 #this means that the current pixcount is already checked and it's not white
                 if i != image_shape[1]:
                     i = i + 1
                     pixcount = pixcount + 1
                     numpixvisited = numpixvisited + 1
+
+                    #for visualization
+                    arr_pixvisited[pixcount-1] = 255
 
                 ##CONTENT ADDED HERE
                 #moving to the next row!
@@ -87,6 +188,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
             y_vals_of_x_medians.append(j)
 
             last_row_black = 0
+            num_conseq_black_rows = 0
         else:
             num_conseq_black_rows = num_conseq_black_rows + 1
             last_row_black = 1
@@ -106,8 +208,27 @@ def fam2_p2(gray_buff, image_shape, threshold):
     if(len(x_medians) >= 5):
         x_median_final = x_medians[len(x_medians) // 2]
         y_median_final = y_vals_of_x_medians[len(x_medians) // 2]
-    else:
-        x_median_final = 0
-        y_median_final = 0
 
+    #visualization
+    plot_buffer(arr_pixvisited, image_shape)
+    print("num pix visited: ", numpixvisited)
+    print("the y_vals_of_x_medians vec: ", y_vals_of_x_medians)
     return x_median_final, y_median_final
+
+# -- main function end --
+
+# -- file inputs
+image_shape = (240, 240)  # Image dimensions (height, width)
+threshold = 210  # Define your threshold
+
+
+for i in range(10):
+    # filename = 'data/arduinoViz_data/animation_test_arduinoViz/ball_ard_test_240X240_' + str(i) + ".csv" 
+    i = i + 1
+    filename = 'data/seq_data/' + str(i) + '.jpg'
+    gray_buff = image_to_1d_array(filename)
+    image = convert_jpg_to_matrix(filename)
+    #family 2 propsed 2
+    nonlin_x, nonlin_y = fam2_p2(gray_buff, image_shape, threshold)
+    plot_image_with_median_circle(gray_buff, image_shape, nonlin_x, nonlin_y)
+    print("fam2_p2 x: ", nonlin_x, "fam2_p2 y: ", nonlin_y)

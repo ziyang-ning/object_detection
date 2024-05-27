@@ -113,17 +113,34 @@ void loop() {
 //  }
 
 // inorder access function
-  int rand_start = random(0, 5760);
+//  int rand_start = random(0, 5760);
+//  for(int i = 0; i < 5760; i++){
+//    //Still keeping this if statement for consistency
+//    if(rand_start == 5760){
+//      rand_start = 0;
+//    }
+//    
+//    if(fb->buf[i] > THRESH){
+//      x_medians[i] = (fb->buf[i]);
+//    }
+//    rand_start++;
+//  }
+
+  // Jump 10 with 90% prob and jump 5 with 10% prob
+  int rand_start = random(0, 57600);
+  int index = 0;
   for(int i = 0; i < 5760; i++){
-    //Still keeping this if statement for consistency
-    if(rand_start == 5760){
+    if(rand_start == 57600){
       rand_start = 0;
     }
-    
-    if(fb->buf[i] > THRESH){
-      x_medians[i] = (fb->buf[i]);
-    }
-    rand_start++;
+    if(rand_index[rand_start] > 5760){
+      x_medians[i] = fb->buf[index];
+      index += 10;
+    }else{
+      x_medians[i] = fb->buf[index];
+      index += 5;
+      }
+      rand_start++;
   }
   
   

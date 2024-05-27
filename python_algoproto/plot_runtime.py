@@ -5,7 +5,7 @@ import numpy as np
 function_run_times = []
 
 # Open the file and process each line
-with open('data/inord_func_timing.txt', 'r') as file:
+with open('data/skip_func_timing.txt', 'r') as file:
     for line in file:
         if line.startswith("function run time:,"):
             # Extract the function run time after the comma and convert it to an integer
@@ -29,7 +29,7 @@ print(f"Standard Deviation of Function Run Time: {std_dev_run_time:.2f} us")
 
 # Create histogram of function run times
 plt.hist(run_times_array, bins=10, edgecolor='black')
-plt.title('Inorder Access (of 5670 pixels) Time Histogram')
+plt.title('Skipping inorder Access (of 5670 pixels) Time Histogram')
 plt.xlabel('Function Run Time (us)')
 plt.ylabel('Frequency')
 
