@@ -7,6 +7,7 @@ from PIL import Image
 # defalut x y = 0, 0
 x_median_final = 0
 y_median_final = 0
+prev_diameter = 0
 
 ##--- Helper functions, for plotting only ---
 def plot_buffer(buffvec, image_shape):
@@ -65,6 +66,7 @@ def plot_image_with_median_circle(buff_vec, image_shape, median_x, median_y):
 
 # -- main function
 def fam2_p2(gray_buff, image_shape, threshold):
+    global x_median_final, y_median_final, prev_diameter
     pixcount = 0    #using this iterator, might be more efficent than doing mult everytime
     x_medians = []   # size will the the y length of the image
     y_vals_of_x_medians = []
@@ -79,6 +81,11 @@ def fam2_p2(gray_buff, image_shape, threshold):
 
     # for j in range(image_shape[0]):
     j = 0
+    if (x_median_final != 0 and y_median_final != 0):
+        if (y_median_final - 2 * prev_diameter > 0):
+            j = y_median_final - 2 * prev_diameter
+            pixcount = pixcount + j * image_shape[1]
+
     while( j < image_shape[0]):
         all_x_gt_thresh = []    #max size will be the x length of the image
         all_x_gt_thresh_real_length = 0
@@ -86,6 +93,12 @@ def fam2_p2(gray_buff, image_shape, threshold):
         if(blob_start_index != -1 and blob_start_index - 20 > 0):
             i = blob_start_index - 20
             pixcount = pixcount + i
+        elif(x_median_final != 0 and y_median_final != 0):
+            if(x_median_final - 2 * prev_diameter > 0):
+                i = x_median_final - 2 * prev_diameter
+                pixcount = pixcount + i
+            else:
+                i = 0
         else:
             i = 0
 
@@ -208,7 +221,7 @@ def fam2_p2(gray_buff, image_shape, threshold):
     if(len(x_medians) >= 5):
         x_median_final = x_medians[len(x_medians) // 2]
         y_median_final = y_vals_of_x_medians[len(x_medians) // 2]
-
+        prev_diameter = y_vals_of_x_medians[-1] - y_vals_of_x_medians[0]
     #visualization
     plot_buffer(arr_pixvisited, image_shape)
     print("num pix visited: ", numpixvisited)

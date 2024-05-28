@@ -10,6 +10,9 @@ Skip 1 row by default, if 3 consecutive all black rows, start jumping 4 rows at 
 
 # if the whole row is black after the object has already been detected, this means that the object no longer exists. Stop search and return median immediately)
 
+# Addition for the next frame:
+If the previous median is not 0,0 (meaning that it detected something). Then, do not start searching from the first row. Start searching from 1.5 diameter to the left and top last median.
+
 Raw, 10 on each side:
 
 O O [X X X X X X X X X X (X) X X X X X X X X X X]
