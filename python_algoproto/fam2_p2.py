@@ -4,10 +4,14 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from PIL import Image
 
+image_shape = (240, 240)  # Image dimensions (height, width)
+threshold = 210  # Define your threshold
+
 # defalut x y = 0, 0
 x_median_final = 0
 y_median_final = 0
 prev_diameter = 0
+x_termination = image_shape[1]
 
 ##--- Helper functions, for plotting only ---
 def plot_buffer(buffvec, image_shape):
@@ -66,7 +70,7 @@ def plot_image_with_median_circle(buff_vec, image_shape, median_x, median_y):
 
 # -- main function
 def fam2_p2(gray_buff, image_shape, threshold):
-    global x_median_final, y_median_final, prev_diameter
+    global x_median_final, y_median_final, prev_diameter, x_termination
     pixcount = 0    #using this iterator, might be more efficent than doing mult everytime
     x_medians = []   # size will the the y length of the image
     y_vals_of_x_medians = []
@@ -94,17 +98,21 @@ def fam2_p2(gray_buff, image_shape, threshold):
             i = blob_start_index - 20
             pixcount = pixcount + i
         elif(x_median_final != 0 and y_median_final != 0):
-            if(x_median_final - 2 * prev_diameter > 0):
-                i = x_median_final - 2 * prev_diameter
-                pixcount = pixcount + i
-            else:
-                i = 0
+            # if(x_median_final - 2 * prev_diameter > 0):
+            i = x_median_final - 2 * prev_diameter
+            i = max(0, x_median_final - 2 * prev_diameter)
+            pixcount = pixcount + i
+            x_termination = min(image_shape[1], x_median_final + 2 * prev_diameter)
         else:
             i = 0
+            x_termination = image_shape[1]
 
         while (i < image_shape[1] and pixcount < (image_shape[0] *image_shape[1])):
+            if(i > x_termination):
+                pixcount = pixcount + image_shape[1] - i
+                i = i + image_shape[1] #automatically moves to the next row
 
-            if(gray_buff[pixcount] <= threshold or gray_buff[pixcount+1] <= threshold or gray_buff[pixcount+2] <= threshold):
+            elif(gray_buff[pixcount] <= threshold or gray_buff[pixcount+1] <= threshold or gray_buff[pixcount+2] <= threshold):
                 if(i+10 < image_shape[1]):
 
                     #for visualization, yeah shitty code i know
@@ -222,6 +230,9 @@ def fam2_p2(gray_buff, image_shape, threshold):
         x_median_final = x_medians[len(x_medians) // 2]
         y_median_final = y_vals_of_x_medians[len(x_medians) // 2]
         prev_diameter = y_vals_of_x_medians[-1] - y_vals_of_x_medians[0]
+    else:
+        x_median_final = 0
+        y_median_final = 0
     #visualization
     plot_buffer(arr_pixvisited, image_shape)
     print("num pix visited: ", numpixvisited)
@@ -231,10 +242,6 @@ def fam2_p2(gray_buff, image_shape, threshold):
 # -- main function end --
 
 # -- file inputs
-image_shape = (240, 240)  # Image dimensions (height, width)
-threshold = 210  # Define your threshold
-
-
 for i in range(10):
     # filename = 'data/arduinoViz_data/animation_test_arduinoViz/ball_ard_test_240X240_' + str(i) + ".csv" 
     i = i + 1
