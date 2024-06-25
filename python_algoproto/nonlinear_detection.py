@@ -103,8 +103,8 @@ jpg = 1 #a bool for input data type, when 0 it means input is a csv file
 if(jpg):
     # filename = 'data/graydata/multi_roundedsquare.jpg'
     # filename = 'data/graydata/multiobj_challenge.jpg'
-    filename = 'data/graydata/center_perfect.jpg'
-    # filename = 'data/graydata/two_obj_noise.jpg'
+    # filename = 'data/graydata/center_perfect.jpg'
+    filename = 'data/graydata/two_obj_noise.jpg'
     gray_buff = image_to_1d_array(filename)
     image = convert_jpg_to_matrix(filename)
 else:
