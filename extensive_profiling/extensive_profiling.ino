@@ -92,10 +92,10 @@ void loop() {
   uint64_t func_start = esp_timer_get_time();
 
   //Some slow function
-//  int x = 0;
-//  for(int i = 0; i < 5760; i++){
-//    x = random(0, 57600);
-//  }
+  int x = 0;
+  for(int i = 0; i < 57; i++){
+    x = random(0, 57600);
+  }
 
   // Random access function
   //A array of random number with length 5760 was generated
@@ -127,21 +127,21 @@ void loop() {
 //  }
 
   // Jump 10 with 90% prob and jump 5 with 10% prob
-  int rand_start = random(0, 57600);
-  int index = 0;
-  for(int i = 0; i < 5760; i++){
-    if(rand_start == 57600){
-      rand_start = 0;
-    }
-    if(rand_index[rand_start] > 5760){
-      x_medians[i] = fb->buf[index];
-      index += 10;
-    }else{
-      x_medians[i] = fb->buf[index];
-      index += 5;
-      }
-      rand_start++;
-  }
+//  int rand_start = random(0, 57600);
+//  int index = 0;
+//  for(int i = 0; i < 5760; i++){
+//    if(rand_start == 57600){
+//      rand_start = 0;
+//    }
+//    if(rand_index[rand_start] > 5760){
+//      x_medians[i] = fb->buf[index];
+//      index += 10;
+//    }else{
+//      x_medians[i] = fb->buf[index];
+//      index += 5;
+//      }
+//      rand_start++;
+//  }
   
   
   uint64_t funcT = esp_timer_get_time() - func_start;

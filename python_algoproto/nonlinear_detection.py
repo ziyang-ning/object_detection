@@ -750,7 +750,7 @@ plot_bin(image, threshold)
 median_x, median_y = pix_median_jason(gray_buff, image_shape, threshold)
 print("num pix visited: 57600")
 print("median_x: ", median_x, "median_y: ", median_y)
-# plot_image_with_median_circle(gray_buff, image_shape, median_x, median_y)
+plot_image_with_median_circle(gray_buff, image_shape, median_x, median_y)
 
 #family 1 proposed 1
 #tested and works, ready for ESP implementation
